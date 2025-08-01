@@ -1,0 +1,70 @@
+==============================
+Customize VBA Macro for New Formats
+==============================
+
+This macro extracts employee name, SSN, and Gross Pay from Excel files
+that currently follows LAST, FIRST MIDDLE 123-45-6789 format.
+
+To personalize or add support for other state formats,
+you ONLY need to update a few small things:
+
+---------------------------------------------------
+1. REGEX PATTERN (If you don't know what this is, just give the format like LAST, FIRST MIDDLE 123-45-6789 into AI)
+---------------------------------------------------
+Each state might format name + SSN differently (e.g., "Last, First SSN" or "First Last SSN").
+
+Locate this line in the code:
+    regex.Pattern = "..."
+
+Change the pattern to match the format for that state. Here are examples:
+
+> Format: Last, First Middle SSN
+Pattern:
+    "^([A-Za-z\s\-\']+),\s([A-Za-z]+)(?:\s([A-Za-z]+))?\s(\d{3}-\d{2}-\d{4})$"
+
+> Format: First Last SSN
+Pattern:
+    "^([A-Za-z]+)\s([A-Za-z]+)\s(\d{3}-\d{2}-\d{4})$"
+
+> Format: SSN First Last
+Pattern:
+    "^(\d{3}-\d{2}-\d{4})\s([A-Za-z]+)\s([A-Za-z]+)$"
+
+Use a tool like https://regex101.com to test your pattern before pasting it into VBA. 
+
+!!!
+REMEMBER TO ALLOW FOR TWO WORD LAST NAMES, HYPHENS, DASHES, OPTIONAL MIDDLE NAME, ETC
+MAKE SURE YOU COMPARE TOTAL EMPLOYEE COUNT, AND AT LEAST SAMPLE SOME EMPLOYEE, DO NOT SKIP VERIFICATION
+!!!
+
+---------------------------------------------------
+2. GROSS PAY CELL OFFSET
+---------------------------------------------------
+Gross Pay is usually in a consistent position relative to the employee name cell.
+
+Find this line:
+    Set grossPayCell = ws.Cells(employeeCell.Row + X, employeeCell.Column + Y)
+
+Change the row (+X) and column (+Y) offsets as needed:
+
+Examples:
+> Gross Pay is 10 rows down and 2 columns right from the name cell:
+    ws.Cells(employeeCell.Row + 10, employeeCell.Column + 2)
+
+> Gross Pay is 5 rows down and 3 columns right:
+    ws.Cells(employeeCell.Row + 5, employeeCell.Column + 3)
+
+---------------------------------------------------
+3. IF DATA DOESN'T START IN ROW 1
+---------------------------------------------------
+By default, the macro scans from row 1:
+    For rowIndex = 1 To lastRow
+
+If your data starts lower (e.g., row 5), just change that line to:
+    For rowIndex = 5 To lastRow
+
+This will skip any title rows, headers, or blank top sections.
+
+---------------------------------------------------
+If there are any more problems, just copy the module and ask AI. 
+It is very good at regex as long as directions are clear.
